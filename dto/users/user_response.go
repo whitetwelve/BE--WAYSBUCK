@@ -8,3 +8,9 @@ type UserResponse struct {
 type UserResponseDelete struct {
 	ID int `json:"id"`
 }
+type UserResponseUpdate struct {
+	ID       int    `json:"id"`
+	FullName string `json:"name" form:"fullname" validate:"required"`
+	Email    string `json:"email" form:"email" validate:"required"`
+	Image    string `json:"image" form:"image"`
+}

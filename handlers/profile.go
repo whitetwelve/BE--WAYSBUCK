@@ -35,12 +35,12 @@ func (h *handlerProfile) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponseProfile(profile)}
+	response := dto.SuccessResult{Status: "success", Data: convertResponseProfile(profile)}
 	json.NewEncoder(w).Encode(response)
 }
 
-func convertResponseProfile(u models.Profile) models.ProfileResponse {
-	return models.ProfileResponse{
+func convertResponseProfile(u models.Profile) models.ProfileResponseUser {
+	return models.ProfileResponseUser{
 		ID:       u.ID,
 		Phone:    u.Phone,
 		Gender:   u.Gender,

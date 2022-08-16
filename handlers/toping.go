@@ -10,7 +10,6 @@ import (
 	"waysbuck/repositories"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -18,13 +17,10 @@ type handlerToping struct {
 	TopingRepository repositories.TopingRepository
 }
 
-var toping_file = "http://localhost:5000/uploads/"
-
 func HandlerToping(TopingRepository repositories.TopingRepository) *handlerToping {
 	return &handlerToping{TopingRepository}
 }
 
-// GET ALL
 func (h *handlerToping) FindTopings(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -35,16 +31,16 @@ func (h *handlerToping) FindTopings(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
+	// looping untuk melakukan tampilan gambar pada postman
 	for i, p := range topings {
-		topings[i].Image = toping_file + p.Image
+		topings[i].Image = path_file + p.Image
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesFindTopings{Code: http.StatusOK, Data: topings}
+	response := dto.SuccesFindTopings{Status: "Success", Data: topings}
 	json.NewEncoder(w).Encode(response)
 }
 
-// GET DETAIL
 func (h *handlerToping) GetToping(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -59,29 +55,35 @@ func (h *handlerToping) GetToping(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	toping.Image = toping_file + toping.Image
+	// menampilkan gambar
+	toping.Image = path_file + toping.Image
+
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesGetToping{Code: http.StatusOK, Data: toping}
+	response := dto.SuccessResult{Status: "Success", Data: toping}
 	json.NewEncoder(w).Encode(response)
 }
 
-// CREATE
 func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// get data user token
-	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-	userId := int(userInfo["id"].(float64))
-
-	// Get dataFile from midleware and store to filename variable here ...
-	dataContex := r.Context().Value("dataFile") //GET THE VALUE
-	filename := dataContex.(string)             //CONVERT TO STRING
+	dataContex := r.Context().Value("dataFile") // add this code
+	filename := dataContex.(string)             // add this code
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
+	// product_id, _ := strconv.Atoi(r.FormValue("product_id"))
 	request := topingdto.TopingRequest{
 		Title: r.FormValue("title"),
 		Price: price,
+		Image: filename,
 	}
+
+	// request := new(topingdto.TopingRequest)
+	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
 	validation := validator.New()
 	err := validation.Struct(request)
@@ -93,13 +95,12 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	toping := models.Toping{
-		Title:     request.Title,
-		Price:     request.Price,
-		Image:     filename,
-		ProductID: userId,
+		Title: request.Title,
+		Price: request.Price,
+		Image: filename,
 	}
 
-	// err := mysql.DB.Create(&product).Error
+	// err := mysql.DB.Create(&toping).Error
 	toping, err = h.TopingRepository.CreateToping(toping)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -111,15 +112,85 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	toping, _ = h.TopingRepository.GetToping(toping.ID)
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesGetToping{Code: http.StatusOK, Data: toping}
+	response := dto.SuccesGetToping{Status: "Success", Data: toping}
 	json.NewEncoder(w).Encode(response)
 }
 
-func convertResponseToping(u models.Toping) models.TopingResponse {
-	return models.TopingResponse{
-		ID:    u.ID,
-		Title: u.Title,
-		Price: u.Price,
-		Image: u.Image,
+func (h *handlerToping) UpdateToping(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	request := new(topingdto.TopingRequest)
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
 	}
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	toping, err := h.TopingRepository.GetToping(int(id))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.Title != "" {
+		toping.Title = request.Title
+	}
+
+	if request.Price != 0 {
+		toping.Price = request.Price
+	}
+
+	if request.Image != "" {
+		toping.Image = request.Image
+	}
+
+	data, err := h.TopingRepository.UpdateToping(toping)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccesGetToping{Status: "Success", Data: data}
+	json.NewEncoder(w).Encode(response)
 }
+
+func (h *handlerToping) DeleteToping(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	toping, err := h.TopingRepository.GetToping(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	data, err := h.TopingRepository.DeleteToping(toping)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccesGetToping{Status: "Success", Data: data}
+	json.NewEncoder(w).Encode(response)
+}
+
+// func convertResponseToping(u models.Toping) models.TopingResponse {
+// 	return models.TopingResponse{
+// 		ID:    u.ID,
+// 		Name:  u.Name,
+// 		Desc:  u.Desc,
+// 		Price: u.Price,
+// 	}
+// }

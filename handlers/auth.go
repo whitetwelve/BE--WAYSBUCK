@@ -57,40 +57,29 @@ func (h *handlerAuth) Register(w http.ResponseWriter, r *http.Request) {
 		FullName: request.FullName,
 		Email:    request.Email,
 		Password: password,
+		Status:   "customer",
 	}
 
-	_, err = h.AuthRepository.Register(user)
-	fmt.Println(user)
+	data, err := h.AuthRepository.Register(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
 	}
-	// GENERATE TOKENNYA
-	claims := jwt.MapClaims{}
-	token, errGenerateToken := jwtToken.GenerateToken(&claims)
-	if errGenerateToken != nil {
-		log.Println(errGenerateToken)
-		fmt.Println("Token invalid!")
-		return
-	}
 
-	regRes := authdto.RegisterResponse{
-		FullName: user.FullName,
-		Token:    token,
-	}
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessRegister{Code: http.StatusOK, Data: regRes}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
+// HANDLE LOGIN
 func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	request := new(authdto.LoginRequest)
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		response := dto.ErrorResultData{Code: http.StatusBadRequest, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -104,7 +93,7 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthRepository.Login(user.Email)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		response := dto.ErrorResultData{Code: http.StatusBadRequest, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -113,7 +102,7 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	isValid := bcrypt.CheckPasswordHash(request.Password, user.Password)
 	if !isValid {
 		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: "Email or password invalid!"}
+		response := dto.ErrorResultData{Code: http.StatusBadRequest, Message: "Email or password invalid!"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -121,7 +110,7 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	//generate token
 	claims := jwt.MapClaims{}
 	claims["id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * 2).Unix() // 2 hours expired
+	claims["exp"] = time.Now().Add(time.Hour * 12).Unix() // 12 hours expired
 
 	token, errGenerateToken := jwtToken.GenerateToken(&claims)
 	if errGenerateToken != nil {
@@ -137,7 +126,34 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Tmeype", "application/json")
-	response := dto.SuccessResult{Code: http.StatusOK, Data: loginResponse}
+	response := dto.SuccessResult{Status: `Success`, Data: loginResponse}
 	json.NewEncoder(w).Encode(response)
+}
 
+// CHECK AUTH
+func (h *handlerAuth) CheckAuth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	userId := int(userInfo["id"].(float64))
+
+	// Check User by Id
+	user, err := h.AuthRepository.Getuser(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	CheckAuthResponse := authdto.CheckAuthResponse{
+		Id:     user.ID,
+		Name:   user.FullName,
+		Email:  user.Email,
+		Status: user.Status,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	response := dto.SuccessRegister{Status: "Success", Data: CheckAuthResponse}
+	json.NewEncoder(w).Encode(response)
 }

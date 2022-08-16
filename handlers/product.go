@@ -10,7 +10,6 @@ import (
 	"waysbuck/repositories"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -18,13 +17,13 @@ type handlerProduct struct {
 	ProductRepository repositories.ProductRepository
 }
 
+// path alamat untuk akses halaman gambar
 var path_file = "http://localhost:5000/uploads/"
 
 func HandlerProduct(ProductRepository repositories.ProductRepository) *handlerProduct {
 	return &handlerProduct{ProductRepository}
 }
 
-// GET ALL
 func (h *handlerProduct) FindProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -33,19 +32,18 @@ func (h *handlerProduct) FindProducts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
-		return
 	}
 
-	// Create Embed Path File on Image property here ...
+	// looping untuk melakukan tampilan gambar pada postman
 	for i, p := range products {
 		products[i].Image = path_file + p.Image
 	}
+
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesFindProducts{Code: http.StatusOK, Data: products}
+	response := dto.SuccesFindProducts{Status: "Success", Data: products}
 	json.NewEncoder(w).Encode(response)
 }
 
-// GET BY ID
 func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -60,30 +58,34 @@ func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// menampilkan gambar
 	product.Image = path_file + product.Image
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessGetProduct{Code: http.StatusOK, Data: convertResponseProduct(product)}
+	response := dto.SuccessGetProduct{Status: "Success", Data: convertResponseProduct(product)}
 	json.NewEncoder(w).Encode(response)
 }
 
-// CREATE
 func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// get data user token
-	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-	userId := int(userInfo["id"].(float64))
-
-	// Get dataFile from midleware and store to filename variable here ...
-	dataContex := r.Context().Value("dataFile") //GET THE VALUE
-	filename := dataContex.(string)             //CONVERT TO STRING
+	dataContex := r.Context().Value("dataFile") // add this code
+	filename := dataContex.(string)             // add this code
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
+	user_id, _ := strconv.Atoi(r.FormValue("user_id"))
 	request := productdto.ProductRequest{
 		Title: r.FormValue("title"),
 		Price: price,
+		Image: filename,
 	}
+
+	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
 	validation := validator.New()
 	err := validation.Struct(request)
@@ -98,7 +100,7 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		Title:  request.Title,
 		Price:  request.Price,
 		Image:  filename,
-		UserID: userId,
+		UserID: user_id,
 	}
 
 	// err := mysql.DB.Create(&product).Error
@@ -113,41 +115,37 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	product, _ = h.ProductRepository.GetProduct(product.ID)
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessGetProduct{Code: http.StatusOK, Data: product}
+	response := dto.SuccessResult{Status: "Success", Data: product}
 	json.NewEncoder(w).Encode(response)
 }
 
-// UPDATE
 func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(productdto.ProductRequest)
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
+	// dataContex := r.Context().Value("dataUpdate") // add this code
+	// filename := dataContex.(string)               // add this code
+
+	// price, _ := strconv.Atoi(r.FormValue("price"))
+	// user_id, _ := strconv.Atoi(r.FormValue("user_id"))
+	// toping_id, _ := strconv.Atoi(r.FormValue("toping_id"))
+	request := productdto.UpdateProductRequest{
+		Title: r.FormValue("title"),
+		// Price:    price,
+		// Image:    filename,
+		// UserID:   user_id,
+		// TopingID: toping_id,
 	}
 
-	id, _ := strconv.Atoi(mux.Vars(r)["id"])
-	product, err := h.ProductRepository.GetProduct(int(id))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	// request = new(productdto.UpdateProductRequest)
+	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
-	// PENGKONDISIAN AGAR FIELD TIDAK KOSONG
-	if request.Title != "" {
-		product.Title = request.Title
-	}
-
-	if request.Image != "" {
-		product.Image = request.Image
-	}
-
-	data, err := h.ProductRepository.UpdateProduct(product)
+	validation := validator.New()
+	err := validation.Struct(request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
@@ -155,12 +153,26 @@ func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	product := models.Product{
+		Title: request.Title,
+		// Price: price,
+		// Image: filename,
+	}
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	product, err = h.ProductRepository.GetProduct(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: convertResponseProduct(product)}
 	json.NewEncoder(w).Encode(response)
 }
 
-// DELETE
 func (h *handlerProduct) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -182,15 +194,17 @@ func (h *handlerProduct) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessDeleteProduct{Code: http.StatusOK, Data: convertResponseProduct(data)}
+	response := dto.SuccessResult{Status: "Success", Data: convertResponseProduct(data)}
 	json.NewEncoder(w).Encode(response)
 }
+
 func convertResponseProduct(u models.Product) models.ProductResponse {
 	return models.ProductResponse{
 		ID:    u.ID,
 		Title: u.Title,
 		Price: u.Price,
 		Image: u.Image,
-		User:  u.User,
+		// User:  u.User,
+		// Toping: u.Toping,
 	}
 }

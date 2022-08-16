@@ -7,11 +7,18 @@ import (
 	"waysbuck/pkg/mysql"
 	"waysbuck/routes"
 
+	// import github.com/gorilla/handlers package here ...
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 func main() {
+	// env
+	// errEnv := godotenv.Load()
+	// if errEnv != nil {
+	// 	panic("Failed to load env file")
+	// }
+
 	// initial DB
 	mysql.DatabaseInit()
 
@@ -24,12 +31,15 @@ func main() {
 
 	//path file
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
-	fmt.Println("server running localhost:5000")
-	http.ListenAndServe("localhost:5000", r)
 
-	// env
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		panic("Failed to load env file")
-	}
+	// Setup allowed Header, Method, and Origin for CORS here ...
+	var AllowedHeaders = handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	var AllowedMethods = handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE"})
+	var AllowedOrigins = handlers.AllowedOrigins([]string{"*"})
+
+	var port = "5000"
+	fmt.Println("server running localhost:" + port)
+
+	// Embed the setup allowed in 2 parameter here ...
+	http.ListenAndServe("localhost:"+port, handlers.CORS(AllowedHeaders, AllowedMethods, AllowedOrigins)(r))
 }

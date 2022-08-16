@@ -57,5 +57,8 @@ func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 		// add filename to ctx
 		ctx := context.WithValue(r.Context(), "dataFile", filename)
 		next.ServeHTTP(w, r.WithContext(ctx))
+
+		// updatectx := context.WithValue(r.Context(), "dataUpdate", filename)
+		// next.ServeHTTP(w, r.WithContext(updatectx))
 	})
 }

@@ -25,6 +25,16 @@ type ProfileResponse struct {
 	User     UsersProfileResponse `json:"-"`
 }
 
+type ProfileResponseUser struct {
+	ID       int                  `json:"id"`
+	Phone    string               `json:"phone"`
+	Gender   string               `json:"gender"`
+	Address  string               `json:"address"`
+	PostCode string               `json:"post_code"`
+	UserID   int                  `json:"user_id"`
+	User     UsersProfileResponse `json:"user"`
+}
+
 func (ProfileResponse) TableName() string {
 	return "profiles"
 }

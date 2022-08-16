@@ -32,7 +32,7 @@ func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: users}
+	response := dto.SuccessResult{Status: "success", Data: users}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -51,7 +51,7 @@ func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: user}
+	response := dto.SuccessResult{Status: "success", Data: user}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -90,7 +90,7 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(data)}
+	response := dto.SuccessResult{Status: "success", Data: convertResponse(data)}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -141,7 +141,7 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(data)}
+	response := dto.SuccessResult{Status: "success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -170,7 +170,7 @@ func (h *handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		ID: data.ID,
 	}
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessDeleteUser{Code: http.StatusOK, Data: res}
+	response := dto.SuccessDeleteUser{Status: "success", Data: res}
 	json.NewEncoder(w).Encode(response)
 }
 

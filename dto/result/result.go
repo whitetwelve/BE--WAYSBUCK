@@ -1,38 +1,66 @@
 package dto
 
 type SuccessResult struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"users"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"users"`
 }
 type SuccessRegister struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"user"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"user"`
 }
 type SuccessDeleteUser struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"data"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
 }
 type ErrorResult struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
+type ErrorResultData struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
 type SuccesFindProducts struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"products"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"products"`
 }
 type SuccessGetProduct struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"product"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"product"`
 }
 type SuccessDeleteProduct struct {
-	Code int         `json:"code`
-	Data interface{} `json:"data"`
+	Status string      `json:"status`
+	Data   interface{} `json:"data"`
 }
 type SuccesFindTopings struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"toppings"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"toppings"`
 }
 type SuccesGetToping struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"topping"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"topping"`
+}
+type SuccessDeleteToping struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"data"`
+}
+type SuccessFindTransactions struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"Transactions"`
+}
+type SuccessGetTransaction struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"Transaction"`
+}
+type CreateTransaction struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"Products"`
+}
+type EditTransaction struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"Transaction"`
+}
+type DeleteTransaction struct {
+	Status string      `json:"status`
+	Data   interface{} `json:"data"`
 }
