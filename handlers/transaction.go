@@ -32,7 +32,7 @@ func (h *handlerTransaction) FindTransactions(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessFindTransactions{Status: "Success", Data: transactions}
+	response := dto.SuccessResult{Status: "Success", Data: transactions}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -51,7 +51,7 @@ func (h *handlerTransaction) GetTransaction(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessFindTransactions{Status: "Success", Data: transaction}
+	response := dto.SuccessResult{Status: "Success", Data: transaction}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -76,9 +76,9 @@ func (h *handlerTransaction) CreateTransaction(w http.ResponseWriter, r *http.Re
 	}
 
 	transaction := models.Transaction{
-		Status:      request.Status,
-		UserOrderID: request.UserOrderID,
-		OrderID:     request.OrderID,
+		Status:    request.Status,
+		BuyerID:   request.BuyerID,
+		ProductID: request.ProductID,
 	}
 
 	// err := mysql.DB.Create(&transaction).Error
@@ -93,14 +93,14 @@ func (h *handlerTransaction) CreateTransaction(w http.ResponseWriter, r *http.Re
 	transaction, _ = h.TransactionRepository.GetTransaction(transaction.ID)
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessFindTransactions{Status: "Success", Data: transaction}
+	response := dto.SuccessResult{Status: "Success", Data: transaction}
 	json.NewEncoder(w).Encode(response)
 }
 
 func (h *handlerTransaction) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(transactiondto.TransactionRequest)
+	request := new(transactiondto.UpdateTransactionRequest)
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
@@ -121,8 +121,12 @@ func (h *handlerTransaction) UpdateTransaction(w http.ResponseWriter, r *http.Re
 		transaction.Status = request.Status
 	}
 
-	if request.UserOrderID != 0 {
-		transaction.UserOrderID = request.UserOrderID
+	if request.BuyerID != 0 {
+		transaction.BuyerID = request.BuyerID
+	}
+
+	if request.ProductID != 0 {
+		transaction.ProductID = request.ProductID
 	}
 
 	data, err := h.TransactionRepository.UpdateTransaction(transaction)
@@ -134,7 +138,7 @@ func (h *handlerTransaction) UpdateTransaction(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessFindTransactions{Status: "Success", Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -159,17 +163,15 @@ func (h *handlerTransaction) DeleteTransaction(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessFindTransactions{Status: "Success", Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
-func convertResponseTransaction(u models.Transaction) models.Transaction {
-	return models.Transaction{
-		ID:          u.ID,
-		Status:      u.Status,
-		UserOrderID: u.UserOrderID,
-		UserOrder:   u.UserOrder,
-		OrderID:     u.OrderID,
-		Order:       u.Order,
+func convertResponseTransaction(u models.Transaction) models.TransactionResponse {
+	return models.TransactionResponse{
+		ID:        u.ID,
+		Status:    u.Status,
+		BuyerID:   u.BuyerID,
+		ProductID: u.ProductID,
 	}
 }

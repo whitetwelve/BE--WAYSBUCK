@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	productdto "waysbuck/dto/product"
 	dto "waysbuck/dto/result"
 	topingdto "waysbuck/dto/toping"
 	"waysbuck/models"
@@ -37,7 +38,7 @@ func (h *handlerToping) FindTopings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesFindTopings{Status: "Success", Data: topings}
+	response := dto.SuccessResult{Status: "Success", Data: topings}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -70,20 +71,11 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	filename := dataContex.(string)             // add this code
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
-	// product_id, _ := strconv.Atoi(r.FormValue("product_id"))
-	request := topingdto.TopingRequest{
+	request := productdto.ProductRequest{
 		Title: r.FormValue("title"),
 		Price: price,
 		Image: filename,
 	}
-
-	// request := new(topingdto.TopingRequest)
-	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// }
 
 	validation := validator.New()
 	err := validation.Struct(request)
@@ -112,14 +104,14 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	toping, _ = h.TopingRepository.GetToping(toping.ID)
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesGetToping{Status: "Success", Data: toping}
+	response := dto.SuccessResult{Status: "Success", Data: toping}
 	json.NewEncoder(w).Encode(response)
 }
 
 func (h *handlerToping) UpdateToping(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(topingdto.TopingRequest)
+	request := new(topingdto.UpdateTopingRequest)
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
@@ -157,7 +149,7 @@ func (h *handlerToping) UpdateToping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesGetToping{Status: "Success", Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -182,15 +174,14 @@ func (h *handlerToping) DeleteToping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccesGetToping{Status: "Success", Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
-// func convertResponseToping(u models.Toping) models.TopingResponse {
-// 	return models.TopingResponse{
-// 		ID:    u.ID,
-// 		Name:  u.Name,
-// 		Desc:  u.Desc,
-// 		Price: u.Price,
-// 	}
-// }
+func convertResponseToping(u models.Toping) models.TopingResponse {
+	return models.TopingResponse{
+		Title: u.Title,
+		Price: u.Price,
+		Image: u.Image,
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	profiledto "waysbuck/dto/profile"
 	dto "waysbuck/dto/result"
 	"waysbuck/models"
 	"waysbuck/repositories"
@@ -19,7 +20,6 @@ func HandlerProfile(ProfileRepository repositories.ProfileRepository) *handlerPr
 	return &handlerProfile{ProfileRepository}
 }
 
-// GET BY ID
 func (h *handlerProfile) GetProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -35,18 +35,16 @@ func (h *handlerProfile) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Status: "success", Data: convertResponseProfile(profile)}
+	response := dto.SuccessResult{Status: "Success", Data: convertResponseProfile(profile)}
 	json.NewEncoder(w).Encode(response)
 }
 
-func convertResponseProfile(u models.Profile) models.ProfileResponseUser {
-	return models.ProfileResponseUser{
-		ID:       u.ID,
-		Phone:    u.Phone,
-		Gender:   u.Gender,
-		Address:  u.Address,
-		PostCode: u.PostCode,
-		UserID:   u.UserID,
-		User:     u.User,
+func convertResponseProfile(u models.Profile) profiledto.ProfileResponse {
+	return profiledto.ProfileResponse{
+		ID:      u.ID,
+		Phone:   u.Phone,
+		Address: u.Address,
+		UserID:  u.UserID,
+		User:    u.User,
 	}
 }

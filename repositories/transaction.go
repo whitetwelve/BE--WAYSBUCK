@@ -18,30 +18,25 @@ func RepositoryTransaction(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
-// GET ALL
 func (r *repository) FindTransactions() ([]models.Transaction, error) {
 	var transactions []models.Transaction
-	err := r.db.Preload("userOrder").Preload("Order").Find(&transactions).Error
+	err := r.db.Preload("User").Preload("Cart").Find(&transactions).Error
 
 	return transactions, err
 }
 
-// GET BY ID
 func (r *repository) GetTransaction(ID int) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("useOrder").Preload("Order").First(&transaction, ID).Error
-
+	err := r.db.Find(&transaction, ID).Error
 	return transaction, err
 }
 
-// POST
 func (r *repository) CreateTransaction(transaction models.Transaction) (models.Transaction, error) {
 	err := r.db.Create(&transaction).Error
 
 	return transaction, err
 }
 
-// UPDATE
 func (r *repository) UpdateTransaction(transaction models.Transaction) (models.Transaction, error) {
 	err := r.db.Save(&transaction).Error
 

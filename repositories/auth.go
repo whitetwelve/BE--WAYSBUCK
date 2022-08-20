@@ -10,6 +10,7 @@ type AuthRepository interface {
 	Register(user models.User) (models.User, error)
 	Login(email string) (models.User, error)
 	Getuser(ID int) (models.User, error)
+	CreateAuth(user models.User) (models.User, error)
 }
 
 func RepositoryAuth(db *gorm.DB) *repository {
@@ -35,6 +36,13 @@ func (r *repository) Login(email string) (models.User, error) {
 func (r *repository) Getuser(ID int) (models.User, error) {
 	var user models.User
 	err := r.db.First(&user, ID).Error
+
+	return user, err
+}
+
+func (r *repository) CreateAuth(user models.User) (models.User, error) {
+	// Using "Create" method here ...
+	err := r.db.Create(&user).Error
 
 	return user, err
 }

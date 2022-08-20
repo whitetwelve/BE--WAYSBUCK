@@ -1,7 +1,13 @@
 package transactiondto
 
 type TransactionRequest struct {
-	OrderID     int    `json:"order_id"`
-	UserOrderID int    `json:"user_order_id"`
-	Status      string `json:"status" gorm:"type: varchar(255)"`
+	Status    string `json:"status" gorm:"type: varchar(255)"`
+	BuyerID   int    `json:"buyer_id"`
+	ProductID int    `json:"product_id"`
+}
+
+type UpdateTransactionRequest struct {
+	Status    string `json:"status" gorm:"type: varchar(255)"`
+	BuyerID   int    `json:"buyer_id"`
+	ProductID int    `json:"product_id"`
 }

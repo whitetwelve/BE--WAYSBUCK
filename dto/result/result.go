@@ -4,6 +4,10 @@ type SuccessResult struct {
 	Status string      `json:"status"`
 	Data   interface{} `json:"users"`
 }
+type SuccessCart struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"carts"`
+}
 type SuccessRegister struct {
 	Status string      `json:"status"`
 	Data   interface{} `json:"user"`

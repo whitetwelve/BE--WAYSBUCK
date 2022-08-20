@@ -2,7 +2,7 @@ package usersdto
 
 type UserResponse struct {
 	ID       int    `json:"id"`
-	FullName string `json:"name" form:"fullname" validate:"required"`
+	FullName string `json:"fullname" form:"fullname" validate:"required"`
 	Email    string `json:"email" form:"email" validate:"required"`
 }
 type UserResponseDelete struct {
@@ -10,7 +10,7 @@ type UserResponseDelete struct {
 }
 type UserResponseUpdate struct {
 	ID       int    `json:"id"`
-	FullName string `json:"name" form:"fullname" validate:"required"`
+	FullName string `json:"fullname" form:"fullname" validate:"required"`
 	Email    string `json:"email" form:"email" validate:"required"`
-	Image    string `json:"image" form:"image"`
+	Image    string `json:"image" form:"image" validate:"required"`
 }

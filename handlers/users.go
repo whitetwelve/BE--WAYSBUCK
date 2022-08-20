@@ -9,7 +9,6 @@ import (
 	"waysbuck/models"
 	"waysbuck/repositories"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -21,6 +20,8 @@ func HandlerUser(UserRepository repositories.UserRepository) *handler {
 	return &handler{UserRepository}
 }
 
+var profile_file = "http://localhost:5000/uploads/"
+
 // GET ALL
 func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -29,6 +30,10 @@ func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
+	}
+
+	for i, p := range users {
+		users[i].Image = profile_file + p.Image
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -50,47 +55,53 @@ func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.Image = profile_file + user.Image
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "success", Data: user}
 	json.NewEncoder(w).Encode(response)
 }
 
 // CREATE USER
-func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *handler) CreateAuth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(usersdto.CreateUserRequest)
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
+	dataContex := r.Context().Value("dataFile")
+	filename := dataContex.(string)
+
+	request := usersdto.CreateUserRequest{
+		FullName: r.FormValue("fullname"),
+		Email:    r.FormValue("email"),
+		Image:    filename,
+		Password: r.FormValue("password"),
+		Status:   r.FormValue("status"),
 	}
 
-	validation := validator.New()
-	err := validation.Struct(request)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	// validate := validator.New()
+	// err := validate.Struct(request)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
 	user := models.User{
 		FullName: request.FullName,
 		Email:    request.Email,
-		Image:    request.Image,
+		Password: request.Password,
+		Image:    filename,
+		Status:   request.Status,
 	}
 
 	data, err := h.UserRepository.CreateUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Status: "success", Data: convertResponse(data)}
+	response := dto.SuccessGetProduct{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -98,12 +109,14 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(usersdto.UpdateUserRequest)
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
+	dataContex := r.Context().Value("dataFile")
+	filename := dataContex.(string)
+
+	// user_id, _ := strconv.Atoi(r.FormValue("user_id"))
+	request := usersdto.UpdateUserRequest{
+		FullName: r.FormValue("fullname"),
+		Email:    r.FormValue("email"),
+		Image:    filename,
 	}
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
@@ -115,17 +128,12 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// PENGKONDISIAN AGAR FIELD TIDAK KOSONG
 	if request.FullName != "" {
 		user.FullName = request.FullName
 	}
 
 	if request.Email != "" {
 		user.Email = request.Email
-	}
-
-	if request.Password != "" {
-		user.Password = request.Password
 	}
 
 	if request.Image != "" {
@@ -140,8 +148,11 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// menampilkan gambar
+	user.Image = path_file + user.Image
+
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Status: "success", Data: data}
+	response := dto.SuccessResult{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 

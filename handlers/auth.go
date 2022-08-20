@@ -120,9 +120,12 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loginResponse := authdto.LoginResponse{
+		ID:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
 		Token:    token,
+		Status:   user.Status,
+		Image:    user.Image,
 	}
 
 	w.Header().Set("Content-Tmeype", "application/json")
@@ -147,10 +150,10 @@ func (h *handlerAuth) CheckAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	CheckAuthResponse := authdto.CheckAuthResponse{
-		Id:     user.ID,
-		Name:   user.FullName,
-		Email:  user.Email,
-		Status: user.Status,
+		Id:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Status:   user.Status,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
