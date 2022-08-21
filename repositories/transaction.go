@@ -10,36 +10,55 @@ type TransactionRepository interface {
 	FindTransactions() ([]models.Transaction, error)
 	GetTransaction(ID int) (models.Transaction, error)
 	CreateTransaction(transaction models.Transaction) (models.Transaction, error)
-	UpdateTransaction(status string, ID string) (models.Transaction, error)
 	DeleteTransaction(transaction models.Transaction) (models.Transaction, error)
+	GetUserTransaction(ID int) ([]models.User, error)
+	UpdateTransaction(status string, ID string) error
+	GetOneTransaction(ID string) (models.Transaction, error)
 }
 
 func RepositoryTransaction(db *gorm.DB) *repository {
 	return &repository{db}
 }
-
 func (r *repository) FindTransactions() ([]models.Transaction, error) {
-	var ID int
 	var transactions []models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Find(&transactions, "buyer_id = ?", ID).Error
+	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Error
 
 	return transactions, err
 }
 
 func (r *repository) GetTransaction(ID int) (models.Transaction, error) {
+	var transactions models.Transaction
+	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Find(&transactions, "id = ?", ID).Error
+
+	return transactions, err
+}
+func (r *repository) GetOneTransaction(ID string) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").First(&transaction, "id = ?", ID).Error
+	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").First(&transaction, "id = ?", ID).Error
 
 	return transaction, err
 }
 
-func (r *repository) CreateTransaction(transaction models.Transaction) (models.Transaction, error) {
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Create(&transaction).Error
+func (r *repository) CreateTransaction(transactions models.Transaction) (models.Transaction, error) {
+	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Create(&transactions).Error
+
+	return transactions, err
+}
+
+func (r *repository) DeleteTransaction(transaction models.Transaction) (models.Transaction, error) {
+	err := r.db.Delete(&transaction).Error
 
 	return transaction, err
 }
 
-func (r *repository) UpdateTransaction(ID string, status string) (models.Transaction, error) {
+func (r *repository) GetUserTransaction(UserID int) ([]models.User, error) {
+	var user []models.User
+	err := r.db.Debug().Preload("User").Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Find(&user, "user_id  = ?", UserID).Error
+
+	return user, err
+}
+
+func (r *repository) UpdateTransaction(status string, ID string) error {
 	var transaction models.Transaction
 	r.db.Preload("Product").First(&transaction, ID)
 
@@ -47,7 +66,7 @@ func (r *repository) UpdateTransaction(ID string, status string) (models.Transac
 	if status != transaction.Status && status == "success" {
 		var product models.Product
 		r.db.First(&product, transaction.Product.ID)
-		product.Qty = product.Qty - 1
+		//   product.Qty = product.Qty - 1
 		r.db.Save(&product)
 	}
 
@@ -55,11 +74,5 @@ func (r *repository) UpdateTransaction(ID string, status string) (models.Transac
 
 	err := r.db.Save(&transaction).Error
 
-	return transaction, err
-}
-
-func (r *repository) DeleteTransaction(transaction models.Transaction) (models.Transaction, error) {
-	err := r.db.Delete(&transaction).Error
-
-	return transaction, err
+	return err
 }

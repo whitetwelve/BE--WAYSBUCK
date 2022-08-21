@@ -14,21 +14,24 @@ type ProductRepository interface {
 	DeleteProduct(product models.Product) (models.Product, error)
 }
 
+// type repository struct {
+// 	db *gorm.DB
+// }
+
 func RepositoryProduct(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
 func (r *repository) FindProducts() ([]models.Product, error) {
 	var products []models.Product
-	err := r.db.Preload("Toping").Find(&products).Error
+	err := r.db.Find(&products).Error
 
 	return products, err
 }
 
 func (r *repository) GetProduct(ID int) (models.Product, error) {
 	var product models.Product
-	// not yet using category relation, cause this step doesnt Belong to Many
-	err := r.db.Preload("Toping").First(&product, ID).Error
+	err := r.db.First(&product, ID).Error
 
 	return product, err
 }
