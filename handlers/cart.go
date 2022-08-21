@@ -102,12 +102,13 @@ func (h *handlerCart) CreateCart(w http.ResponseWriter, r *http.Request) {
 	topping, _ := h.CartRepository.FindCartTopings(request.TopingID)
 
 	cart := models.Cart{
-		ProductID: request.ProductID,
-		UserID:    user_id,
-		Qty:       request.Qty,
-		SubAmount: request.SubAmount,
-		Toping:    topping,
-		Image:     request.Image,
+		ProductID:   request.ProductID,
+		UserID:      user_id,
+		Qty:         request.Qty,
+		SubAmount:   request.SubAmount,
+		Toping:      topping,
+		Image:       request.Image,
+		ProductName: request.ProductName,
 	}
 
 	// err := mysql.DB.Create(&cart).Error
