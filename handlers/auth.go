@@ -123,6 +123,8 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 		ID:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
+		Address:  user.Address,
+		PostCode: user.PostCode,
 		Token:    token,
 		Status:   user.Status,
 		Image:    user.Image,

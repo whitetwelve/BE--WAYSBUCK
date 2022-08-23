@@ -11,3 +11,13 @@ type CartRequest struct {
 	TopingID      []int  `json:"toping_id" form:"toping_id" gorm:"-"`
 	UserID        int    `json:"user_id" gorm:"type: int"`
 }
+
+type CreateCart struct {
+	ID        int    `json:"id"`
+	UserID    int    `json:"user_id"`
+	ProductID int    `json:"product_id"`
+	TopingID  []int  `json:"toping_id"`
+	QTY       int    `json:"qty"`
+	SubAmount int    `json:"subamount"`
+	Status    string `jsom:"status"`
+}

@@ -63,7 +63,7 @@ func (h *handlerCart) CreateCart(w http.ResponseWriter, r *http.Request) {
 	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
 	user_id := int(userInfo["id"].(float64))
 
-	request := new(cartdto.CartRequest)
+	request := new(cartdto.CreateCart)
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
@@ -85,7 +85,6 @@ func (h *handlerCart) CreateCart(w http.ResponseWriter, r *http.Request) {
 	RequestCartForm := models.Cart{
 		ProductID: request.ProductID,
 		UserID:    user_id,
-		Qty:       request.Qty,
 		SubAmount: request.SubAmount,
 		TopingID:  request.TopingID,
 	}
@@ -102,13 +101,10 @@ func (h *handlerCart) CreateCart(w http.ResponseWriter, r *http.Request) {
 	topping, _ := h.CartRepository.FindCartTopings(request.TopingID)
 
 	cart := models.Cart{
-		ProductID:   request.ProductID,
-		UserID:      user_id,
-		Qty:         request.Qty,
-		SubAmount:   request.SubAmount,
-		Toping:      topping,
-		Image:       request.Image,
-		ProductName: request.ProductName,
+		ProductID: request.ProductID,
+		UserID:    user_id,
+		SubAmount: request.SubAmount,
+		Toping:    topping,
 	}
 
 	// err := mysql.DB.Create(&cart).Error
@@ -207,6 +203,30 @@ func (h *handlerCart) DeleteCart(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "Success", Data: data}
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *handlerCart) GetUserCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// get data user token
+	// userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	// userId := int(userInfo["id"].(float64))
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	cart, err := h.CartRepository.GetUserCart(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+	}
+
+	// for i, p := range cart {
+	//  cart[i].Product.Image = path_file + p.Product.Image
+	// }
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Data: cart}
 	json.NewEncoder(w).Encode(response)
 }
 

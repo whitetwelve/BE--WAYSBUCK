@@ -13,6 +13,7 @@ type CartRepository interface {
 	UpdateCart(cart models.Cart) (models.Cart, error)
 	DeleteCart(cart models.Cart, ID int) (models.Cart, error)
 	FindCartTopings(ID []int) ([]models.Toping, error)
+	GetUserCart(ID int) ([]models.Cart, error)
 }
 
 func RepositoryCart(db *gorm.DB) *repository {
@@ -62,4 +63,12 @@ func (r *repository) FindCartTopings(ID []int) ([]models.Toping, error) {
 	err := r.db.Find(&topings, ID).Error
 
 	return topings, err
+}
+
+// GET USER CART
+func (r *repository) GetUserCart(UserID int) ([]models.Cart, error) {
+	var user []models.Cart
+	err := r.db.Debug().Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Find(&user, "user_id  = ?", UserID).Error
+
+	return user, err
 }

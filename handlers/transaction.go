@@ -72,8 +72,8 @@ func (h *handlerTransaction) GetTransaction(w http.ResponseWriter, r *http.Reque
 func (h *handlerTransaction) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-	userId := int(userInfo["id"].(float64))
+	// userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	// userId := int(userInfo["id"].(float64))
 
 	var request transactiondto.TransactionRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -87,7 +87,7 @@ func (h *handlerTransaction) CreateTransaction(w http.ResponseWriter, r *http.Re
 
 	transaction := models.Transaction{
 		ProductID: request.ProductId,
-		BuyerID:   userId,
+		BuyerID:   request.BuyerId,
 		Price:     request.Price,
 		Status:    "Waiting Approve",
 	}

@@ -112,11 +112,12 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	dataContex := r.Context().Value("dataFile")
 	filename := dataContex.(string)
 
-	// user_id, _ := strconv.Atoi(r.FormValue("user_id"))
 	request := usersdto.UpdateUserRequest{
 		FullName: r.FormValue("fullname"),
 		Email:    r.FormValue("email"),
 		Image:    filename,
+		Address:  r.FormValue("address"),
+		PostCode: r.FormValue("post_code"),
 	}
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
@@ -140,6 +141,14 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		user.Image = request.Image
 	}
 
+	if request.Address != "" {
+		user.Address = request.Address
+	}
+
+	if request.PostCode != "" {
+		user.PostCode = request.PostCode
+	}
+
 	data, err := h.UserRepository.UpdateUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -147,9 +156,6 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
-	// menampilkan gambar
-	user.Image = path_file + user.Image
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "Success", Data: data}

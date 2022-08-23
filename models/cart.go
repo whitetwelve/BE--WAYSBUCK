@@ -14,7 +14,7 @@ type Cart struct {
 	SubAmount   int                 `json:"subamount"`
 	TopingID    []int               `json:"toping_id" form:"toping_id" gorm:"-"`
 	Toping      []Toping            `json:"toping" gorm:"many2many:cart_topings"`
-	CreatedAt   time.Time           `json:"-"`
+	CreatedAt   time.Time           `json:"created_at"`
 	UpdatedAt   time.Time           `json:"-"`
 }
 
@@ -27,7 +27,7 @@ type CartResponse struct {
 	Toping    []Toping            `json:"toping"`
 	Qty       int                 `json:"qty" form:"qty"`
 	SubAmount int                 `json:"subamount"`
-	CreatedAt time.Time           `json:"-"`
+	CreatedAt time.Time           `json:"created_at"`
 	UpdatedAt time.Time           `json:"-"`
 }
 
