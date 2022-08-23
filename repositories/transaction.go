@@ -21,28 +21,28 @@ func RepositoryTransaction(db *gorm.DB) *repository {
 }
 func (r *repository) FindTransactions() ([]models.Transaction, error) {
 	var transactions []models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Error
+	err := r.db.Preload("User").Preload("Product").Error
 
 	return transactions, err
 }
 
 func (r *repository) GetTransaction(ID int) (models.Transaction, error) {
-	var transactions models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Find(&transactions, "id = ?", ID).Error
-
-	return transactions, err
+	var transaction models.Transaction
+	err := r.db.Preload("Buyer").Preload("Product").Find(&transaction, ID).Error
+	return transaction, err
 }
+
 func (r *repository) GetOneTransaction(ID string) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").First(&transaction, "id = ?", ID).Error
+	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").First(&transaction, "id = ?", ID).Error
 
 	return transaction, err
 }
 
-func (r *repository) CreateTransaction(transactions models.Transaction) (models.Transaction, error) {
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").Preload("Seller").Create(&transactions).Error
+func (r *repository) CreateTransaction(transaction models.Transaction) (models.Transaction, error) {
+	err := r.db.Create(&transaction).Error
 
-	return transactions, err
+	return transaction, err
 }
 
 func (r *repository) DeleteTransaction(transaction models.Transaction) (models.Transaction, error) {
@@ -53,7 +53,7 @@ func (r *repository) DeleteTransaction(transaction models.Transaction) (models.T
 
 func (r *repository) GetUserTransaction(UserID int) ([]models.User, error) {
 	var user []models.User
-	err := r.db.Debug().Preload("User").Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Find(&user, "user_id  = ?", UserID).Error
+	err := r.db.Debug().Preload("Buyer").Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Find(&user, "user_id  = ?", UserID).Error
 
 	return user, err
 }

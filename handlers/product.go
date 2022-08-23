@@ -9,6 +9,7 @@ import (
 	"waysbuck/models"
 	"waysbuck/repositories"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -119,6 +120,9 @@ func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		Image: filename,
 	}
 
+	validation := validator.New()
+	err := validation.Struct(request)
+
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 	product, err := h.ProductRepository.GetProduct(int(id))
 	if err != nil {
@@ -140,22 +144,13 @@ func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		product.Image = filename
 	}
 
-	productData := models.Product{
-		Title: request.Title,
-		Price: request.Price,
-		Image: filename,
-	}
-
-	data, err := h.ProductRepository.UpdateProduct(productData)
+	data, err := h.ProductRepository.UpdateProduct(product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
-	// menampilkan gambar
-	product.Image = path_file + product.Image
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "Success", Data: convertResponseProduct(data)}

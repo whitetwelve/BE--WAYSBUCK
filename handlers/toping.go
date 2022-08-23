@@ -111,13 +111,19 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 func (h *handlerToping) UpdateToping(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	request := new(topingdto.UpdateTopingRequest)
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
+	dataContex := r.Context().Value("dataFile")
+	filename := dataContex.(string)
+
+	price, _ := strconv.Atoi(r.FormValue("price"))
+	// user_id, _ := strconv.Atoi(r.FormValue("user_id"))
+	request := topingdto.TopingRequest{
+		Title: r.FormValue("title"),
+		Price: price,
+		Image: filename,
 	}
+
+	validation := validator.New()
+	err := validation.Struct(request)
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 	toping, err := h.TopingRepository.GetToping(int(id))
@@ -137,7 +143,7 @@ func (h *handlerToping) UpdateToping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request.Image != "" {
-		toping.Image = request.Image
+		toping.Image = filename
 	}
 
 	data, err := h.TopingRepository.UpdateToping(toping)

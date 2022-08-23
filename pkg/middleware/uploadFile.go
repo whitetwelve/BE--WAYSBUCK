@@ -11,7 +11,7 @@ import (
 func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Upload file
-		file, _, err := r.FormFile("image")
+		file, handler, err := r.FormFile("image")
 
 		// JIKA VALUE PROPERTI TDK SESUAI
 		if err != nil {
@@ -32,7 +32,7 @@ func UploadFile(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// JIKA FOLDER UPLOADS TIDAK ADA
-		tempFile, err := ioutil.TempFile("uploads", "image-*.png")
+		tempFile, err := ioutil.TempFile("uploads", "image-*"+handler.Filename)
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("PATH UPLOAD NOT FOUND!")
