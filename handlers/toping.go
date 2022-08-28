@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strconv"
 	productdto "waysbuck/dto/product"
 	dto "waysbuck/dto/result"
@@ -10,6 +12,8 @@ import (
 	"waysbuck/models"
 	"waysbuck/repositories"
 
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
@@ -33,9 +37,9 @@ func (h *handlerToping) FindTopings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// looping untuk melakukan tampilan gambar pada postman
-	for i, p := range topings {
-		topings[i].Image = path_file + p.Image
-	}
+	// for i, p := range topings {
+	// 	topings[i].Image = path_file + p.Image
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "Success", Data: topings}
@@ -57,7 +61,7 @@ func (h *handlerToping) GetToping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// menampilkan gambar
-	toping.Image = path_file + toping.Image
+	// toping.Image = path_file + toping.Image
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "Success", Data: toping}
@@ -68,28 +72,29 @@ func (h *handlerToping) CreateToping(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	dataContex := r.Context().Value("dataFile") // add this code
-	filename := dataContex.(string)             // add this code
+	filepath := dataContex.(string)             // add this code
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
 	request := productdto.ProductRequest{
 		Title: r.FormValue("title"),
 		Price: price,
-		Image: filename,
+		Image: filepath,
 	}
 
-	validation := validator.New()
-	err := validation.Struct(request)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
 
+	// Add your Cloudinary credentials ...
+	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+	// Upload file to Cloudinary ...
+	resp, err := cld.Upload.Upload(ctx, filepath, uploader.UploadParams{Folder: "waysbuck"})
 	toping := models.Toping{
 		Title: request.Title,
 		Price: request.Price,
-		Image: filename,
+		Image: resp.SecureURL,
 	}
 
 	// err := mysql.DB.Create(&toping).Error

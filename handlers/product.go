@@ -24,7 +24,7 @@ type handlerProduct struct {
 }
 
 // path alamat untuk akses halaman gambar
-var path_file = "http://localhost:5000/uploads/"
+// var path_file = "http://localhost:5000/uploads/"
 
 func HandlerProduct(ProductRepository repositories.ProductRepository) *handlerProduct {
 	return &handlerProduct{ProductRepository}

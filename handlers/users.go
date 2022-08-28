@@ -20,7 +20,7 @@ func HandlerUser(UserRepository repositories.UserRepository) *handler {
 	return &handler{UserRepository}
 }
 
-var profile_file = "http://localhost:5000/uploads/"
+// var profile_file = "http://localhost:5000/uploads/"
 
 // GET ALL
 func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +32,9 @@ func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err.Error())
 	}
 
-	for i, p := range users {
-		users[i].Image = profile_file + p.Image
-	}
+	// for i, p := range users {
+	// 	users[i].Image = profile_file + p.Image
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "success", Data: users}
@@ -55,7 +55,7 @@ func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Image = profile_file + user.Image
+	// user.Image = profile_file + user.Image
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Status: "success", Data: user}
 	json.NewEncoder(w).Encode(response)
