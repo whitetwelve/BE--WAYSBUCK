@@ -1,6 +1,0 @@
-SECRET_KEY=bolehapaaja
-PATH_FILE=http://localhost:5000/uploads/
-SERVER_KEY=SB-Mid-server-W1QDk2WXWJQH_ID6AuV9CMSK
-CLIENT_KEY=SB-Mid-client-cs4wafYdCgg8Esyq
-EMAIL_SYSTEM=email_here...
-PASSWORD_SYSTEM=password_app...

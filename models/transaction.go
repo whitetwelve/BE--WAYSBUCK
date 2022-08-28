@@ -4,15 +4,14 @@ import "time"
 
 // User model struct
 type Transaction struct {
-	ID        int                      `json:"id" gorm:"primary_key:auto_increment"`
-	ProductID int                      `json:"product_id"`
-	Product   ProductUserResponse      `json:"product" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	BuyerID   int                      `json:"buyer_id"`
-	Buyer     UsersTransactionResponse `json:"buyer"`
-	Price     int                      `json:"price"`
-	Status    string                   `json:"status"  gorm:"type:varchar(25)"`
-	CreatedAt time.Time                `json:"-"`
-	UpdatedAt time.Time                `json:"-"`
+	ID        int       `json:"id" gorm:"primary_key:auto_increment"`
+	BuyerID   int       `json:"buyer_id"`
+	Buyer     User      `json:"buyer" `
+	Price     int       `json:"price"`
+	Carts     []Cart    `json:"cart"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 type TransactionResponse struct {

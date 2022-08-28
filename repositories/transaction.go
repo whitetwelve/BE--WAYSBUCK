@@ -11,7 +11,7 @@ type TransactionRepository interface {
 	GetTransaction(ID int) (models.Transaction, error)
 	CreateTransaction(transaction models.Transaction) (models.Transaction, error)
 	DeleteTransaction(transaction models.Transaction) (models.Transaction, error)
-	GetUserTransaction(ID int) ([]models.User, error)
+	GetUserTransaction(ID int) ([]models.Transaction, error)
 	UpdateTransaction(status string, ID string) error
 	GetOneTransaction(ID string) (models.Transaction, error)
 }
@@ -28,19 +28,19 @@ func (r *repository) FindTransactions() ([]models.Transaction, error) {
 
 func (r *repository) GetTransaction(ID int) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("Buyer").Preload("Product").Find(&transaction, ID).Error
+	err := r.db.Preload("Buyer").Find(&transaction, ID).Error
 	return transaction, err
 }
 
 func (r *repository) GetOneTransaction(ID string) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("Product").Preload("Product.User").Preload("Buyer").First(&transaction, "id = ?", ID).Error
+	err := r.db.Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Preload("Buyer").First(&transaction, "id = ?", ID).Error
 
 	return transaction, err
 }
 
 func (r *repository) CreateTransaction(transaction models.Transaction) (models.Transaction, error) {
-	err := r.db.Create(&transaction).Error
+	err := r.db.Preload("Buyer").Create(&transaction).Error
 
 	return transaction, err
 }
@@ -51,9 +51,9 @@ func (r *repository) DeleteTransaction(transaction models.Transaction) (models.T
 	return transaction, err
 }
 
-func (r *repository) GetUserTransaction(UserID int) ([]models.User, error) {
-	var user []models.User
-	err := r.db.Debug().Preload("Buyer").Preload("Carts").Preload("Carts.Product").Preload("Carts.Topping").Find(&user, "user_id  = ?", UserID).Error
+func (r *repository) GetUserTransaction(ID int) ([]models.Transaction, error) {
+	var user []models.Transaction
+	err := r.db.Preload("Buyer").Find(&user, "buyer_id  = ?", ID).Error
 
 	return user, err
 }
@@ -65,7 +65,7 @@ func (r *repository) UpdateTransaction(status string, ID string) error {
 	// If is different & Status is "success" decrement product quantity
 	if status != transaction.Status && status == "success" {
 		var product models.Product
-		r.db.First(&product, transaction.Product.ID)
+		r.db.First(&product, transaction.ID)
 		//   product.Qty = product.Qty - 1
 		r.db.Save(&product)
 	}

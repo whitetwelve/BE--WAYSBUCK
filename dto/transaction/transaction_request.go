@@ -1,9 +1,8 @@
 package transactiondto
 
 type TransactionRequest struct {
-	ProductId int `gorm:"type: int" json:"product_id" validate:"required"`
-	Price     int `gorm:"type: int" json:"price" validate:"required"`
-	BuyerId   int `gorm:"type: int" json:"buyer_id" validate:"required"`
+	Price   int `json:"price"`
+	BuyerID int `json:"buyer_id"`
 }
 
 type UpdateTransactionRequest struct {
