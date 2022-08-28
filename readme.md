@@ -21,3 +21,6 @@ PASSWORD MIDTRANS : Fuadazkia17
 
 <!-- BE DEPLOY -->
 https://waysbuck-fuad.herokuapp.com/api/v1/
+
+<!-- FE DEPLOY -->
+https://waysbuck-dumbways.netlify.app/

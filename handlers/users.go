@@ -118,7 +118,6 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		Image:    filename,
 		Address:  r.FormValue("address"),
 		PostCode: r.FormValue("post_code"),
-		Status:   r.FormValue("status"),
 	}
 
 	id, _ := strconv.Atoi(mux.Vars(r)["id"])
