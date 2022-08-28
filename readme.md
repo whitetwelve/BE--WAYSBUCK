@@ -18,3 +18,6 @@ TOPING --> PRODUCT {BELONGSTO MANY}
 <!-- TRANSACTION -->
 SNAP : POP UP PEMBAYARAN PADA MIDTRANS
 PASSWORD MIDTRANS : Fuadazkia17
+
+<!-- BE DEPLOY -->
+https://waysbuck-fuad.herokuapp.com/api/v1/
