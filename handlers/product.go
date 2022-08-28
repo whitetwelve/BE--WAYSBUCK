@@ -75,6 +75,10 @@ func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// dataContex := r.Context().Value("dataFile")
+	// filename := dataContex.(string)
+
+	// get image filepath
 	dataContex := r.Context().Value("dataFile")
 	filepath := dataContex.(string)
 
@@ -84,6 +88,15 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		Price: price,
 		Image: filepath,
 	}
+
+	// validate := validator.New()
+	// err := validate.Struct(request)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
 	var ctx = context.Background()
 	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
@@ -103,8 +116,10 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	product := models.Product{
 		Title: request.Title,
 		Price: request.Price,
-		Image: resp.SecureURL,
+		Image: resp.SecureURL, // Modify store file URL to database from resp.SecureURL ...
 	}
+
+	fmt.Println(product)
 
 	data, err := h.ProductRepository.CreateProduct(product)
 	if err != nil {
@@ -122,14 +137,14 @@ func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	dataContex := r.Context().Value("dataFile")
-	filename := dataContex.(string)
+	filepath := dataContex.(string)
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
 	// user_id, _ := strconv.Atoi(r.FormValue("user_id"))
 	request := productdto.CreateProduct{
 		Title: r.FormValue("title"),
 		Price: price,
-		Image: filename,
+		Image: filepath,
 	}
 
 	validation := validator.New()
@@ -153,7 +168,7 @@ func (h *handlerProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request.Image != "" {
-		product.Image = filename
+		product.Image = filepath
 	}
 
 	data, err := h.ProductRepository.UpdateProduct(product)
