@@ -1,9 +1,9 @@
 package productdto
 
 type CreateProduct struct {
-	Title string `json:"title" form:"title" validate:"required"`
-	Price int    `json:"price" form:"price" gorm:"type: int" validate:"required"`
-	Image string `json:"image" form:"image" validate:"required"`
+	Title string `json:"title" form:"title"`
+	Price int    `json:"price" form:"price" gorm:"type: int"`
+	Image string `json:"image" form:"image"`
 }
 
 type UpdateProduct struct {
