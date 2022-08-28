@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"waysbuck/database"
 	"waysbuck/pkg/mysql"
 	"waysbuck/routes"
@@ -33,14 +34,13 @@ func main() {
 	//path file
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 
-	// Setup allowed Header, Method, and Origin for CORS here ...
 	var AllowedHeaders = handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	var AllowedMethods = handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE"})
 	var AllowedOrigins = handlers.AllowedOrigins([]string{"*"})
 
-	var port = "5000"
-	fmt.Println("server running localhost:" + port)
+	// Modify 1 line this below code get port from env ...
+	var port = os.Getenv("PORT")
 
-	// Embed the setup allowed in 2 parameter here ...
-	http.ListenAndServe("localhost:"+port, handlers.CORS(AllowedHeaders, AllowedMethods, AllowedOrigins)(r))
+	fmt.Println("server running localhost:" + port)
+	http.ListenAndServe(":"+port, handlers.CORS(AllowedHeaders, AllowedMethods, AllowedOrigins)(r))
 }
