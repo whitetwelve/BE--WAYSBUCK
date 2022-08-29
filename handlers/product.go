@@ -75,9 +75,6 @@ func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// dataContex := r.Context().Value("dataFile")
-	// filename := dataContex.(string)
-
 	// get image filepath
 	dataContex := r.Context().Value("dataFile")
 	filepath := dataContex.(string)
@@ -129,7 +126,7 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessGetProduct{Status: "Success", Data: convertResponseProduct(data)}
+	response := dto.SuccessGetProduct{Status: "Success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }
 
